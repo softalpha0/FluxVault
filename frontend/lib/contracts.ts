@@ -2,8 +2,7 @@ export const CONTRACTS = {
   VAULT: "0x7d4ea9219a832eaecf1c74424055c44e711aa836",
   FTSO: "0x66d7b7d7c9fc2db2b4cb795b80e157895a4f9dfc",
   STRATEGY: "0x49f7591dd2e2d8742e6a3929d4f849e53232aff5",
-  FXRP: "0xa92ebf841891e7800395fd759c5a69efef71d57f",
-  REAL_FXRP: "0x0b6A3645c240605887a5532109323A3E12273dc7",
+  FXRP: "0x0b6A3645c240605887a5532109323A3E12273dc7",
   FBTC: "0x4e66783bfeff935dc1811c5dec99edcffcb772b7",
   FDOGE: "0x1963c19c37af20db79f9732b4bc8aee432ebceb4",
 } as const;
@@ -160,43 +159,35 @@ export const ERC20_ABI = [
   },
 ] as const;
 
-// Real FAsset on Coston2 — get from faucet.flare.network
-// Mock tokens — mintable directly in the app for testing
 export const ASSETS = [
   {
     symbol: "FXRP",
-    name: "Flare XRP — Real FAsset",
+    name: "Flare XRP",
     address: "0x0b6A3645c240605887a5532109323A3E12273dc7",
     color: "#00D4AA",
     priceKey: "XRP",
     isMock: false,
+    howToGet: "Get free test FXRP from the Flare faucet — no minting required.",
     faucetUrl: "https://faucet.flare.network",
   },
   {
-    symbol: "FXRP (Test)",
-    name: "Mock FXRP — Mintable",
-    address: "0xa92ebf841891e7800395fd759c5a69efef71d57f",
-    color: "#00AAE4",
-    priceKey: "XRP",
-    isMock: true,
-    faucetUrl: null,
-  },
-  {
     symbol: "FBTC",
-    name: "Mock FBTC — Mintable",
+    name: "Mock FBTC",
     address: "0x4e66783bfeff935dc1811c5dec99edcffcb772b7",
     color: "#F7931A",
     priceKey: "BTC",
     isMock: true,
+    howToGet: "Mint test FBTC directly — click the button below.",
     faucetUrl: null,
   },
   {
     symbol: "FDOGE",
-    name: "Mock FDOGE — Mintable",
+    name: "Mock FDOGE",
     address: "0x1963c19c37af20db79f9732b4bc8aee432ebceb4",
     color: "#C2A633",
     priceKey: "DOGE",
     isMock: true,
+    howToGet: "Mint test FDOGE directly — click the button below.",
     faucetUrl: null,
   },
 ] as const;
