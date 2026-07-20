@@ -1,7 +1,7 @@
 export const CONTRACTS = {
   VAULT: "0xb7e6b422d08b3b39311e520083b106e0d9324a2d",
-  FTSO: "0x66d7b7d7c9fc2db2b4cb795b80e157895a4f9dfc",
-  STRATEGY: "0x49f7591dd2e2d8742e6a3929d4f849e53232aff5",
+  FTSO: "0xC4e9c78EA53db782E28f28Fdf80BaF59336B304d",
+  FDC_VERIFIER: "0x31bf6ce86304df8d1a52848b258a2f2d6fb6de3a",
   FXRP: "0x0b6A3645c240605887a5532109323A3E12273dc7",
   FBTC: "0x4e66783bfeff935dc1811c5dec99edcffcb772b7",
   FDOGE: "0x1963c19c37af20db79f9732b4bc8aee432ebceb4",
@@ -85,37 +85,32 @@ export const VAULT_ABI = [
 
 export const FTSO_ABI = [
   {
-    name: "getBTCPrice",
+    name: "getFeedById",
     type: "function",
-    stateMutability: "view",
-    inputs: [],
+    stateMutability: "payable",
+    inputs: [{ name: "_feedId", type: "bytes21" }],
     outputs: [
-      { name: "price", type: "uint256" },
-      { name: "decimals", type: "int8" },
-      { name: "timestamp", type: "uint64" },
+      { name: "_value", type: "uint256" },
+      { name: "_decimals", type: "int8" },
+      { name: "_timestamp", type: "uint64" },
     ],
   },
+] as const;
+
+export const FDC_ABI = [
   {
-    name: "getXRPPrice",
+    name: "isVerified",
     type: "function",
     stateMutability: "view",
-    inputs: [],
-    outputs: [
-      { name: "price", type: "uint256" },
-      { name: "decimals", type: "int8" },
-      { name: "timestamp", type: "uint64" },
-    ],
+    inputs: [{ name: "txId", type: "bytes32" }],
+    outputs: [{ name: "", type: "bool" }],
   },
   {
-    name: "getDOGEPrice",
+    name: "getVerifiedAmount",
     type: "function",
     stateMutability: "view",
-    inputs: [],
-    outputs: [
-      { name: "price", type: "uint256" },
-      { name: "decimals", type: "int8" },
-      { name: "timestamp", type: "uint64" },
-    ],
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
   },
 ] as const;
 
@@ -194,3 +189,10 @@ export const ASSETS = [
     faucetUrl: null,
   },
 ] as const;
+
+// FTSO Feed IDs for Coston2
+export const FTSO_FEEDS = {
+  BTC:  "0x014254432f55534400000000000000000000000000" as `0x${string}`,
+  XRP:  "0x015852502f55534400000000000000000000000000" as `0x${string}`,
+  DOGE: "0x01444f47452f555344000000000000000000000000" as `0x${string}`,
+} as const;

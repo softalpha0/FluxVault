@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useChainId, usePublicClient } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
 import { CONTRACTS, VAULT_ABI, ERC20_ABI } from "@/lib/contracts";
 
@@ -50,7 +50,6 @@ export function VaultCard({ asset }: { asset: Asset }) {
     query: { enabled: !!address, refetchInterval: 4000 },
   });
 
-  // Use asset-specific decimals for formatting
   const decimals = asset.decimals;
   const deposited   = position ? Number(formatUnits(position[0], 18)) : 0;
   const usdValue    = position ? Number(position[1]) / 1e6 : 0;
@@ -70,7 +69,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
       abi: ERC20_ABI,
       functionName: "mint",
       args: [address, parseUnits("1000", decimals)],
-    });
+    } as any);
   };
 
   const handleApprove = () => {
@@ -79,7 +78,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
       abi: ERC20_ABI,
       functionName: "approve",
       args: [CONTRACTS.VAULT as `0x${string}`, parseUnits("999999", decimals)],
-    });
+    } as any);
   };
 
   const handleDeposit = () => {
@@ -89,7 +88,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
       abi: VAULT_ABI,
       functionName: "deposit",
       args: [asset.address as `0x${string}`, parseUnits(amount, decimals)],
-    });
+    } as any);
   };
 
   const handleWithdraw = () => {
@@ -99,7 +98,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
       abi: VAULT_ABI,
       functionName: "withdraw",
       args: [asset.address as `0x${string}`, parseUnits(amount, 18)],
-    });
+    } as any);
   };
 
   return (
@@ -135,7 +134,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
             </div>
             <div>
               <div style={{ fontSize: 10, color: "#64748B", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Wallet Balance</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: balance > 0 ? "#FFFFFF" : "#E2EAF4", fontFamily: "monospace" }}>{balance.toFixed(asset.decimals === 6 ? 2 : 4)} {asset.symbol}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#E2EAF4", fontFamily: "monospace" }}>{balance.toFixed(decimals === 6 ? 2 : 4)} {asset.symbol}</div>
             </div>
             <div>
               <div style={{ fontSize: 10, color: "#64748B", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.06em" }}>Yield Earned</div>
@@ -184,7 +183,7 @@ export function VaultCard({ asset }: { asset: Asset }) {
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
             <span style={{ fontSize: 11, color: "#64748B" }}>Amount</span>
             {isConnected && (
-              <button onClick={() => setAmount(mode === "deposit" ? balance.toFixed(asset.decimals === 6 ? 2 : 4) : shares.toFixed(4))} style={{ fontSize: 11, color: asset.color, background: "none", border: "none", cursor: "pointer" }}>MAX</button>
+              <button onClick={() => setAmount(mode === "deposit" ? balance.toFixed(decimals === 6 ? 2 : 4) : shares.toFixed(4))} style={{ fontSize: 11, color: asset.color, background: "none", border: "none", cursor: "pointer" }}>MAX</button>
             )}
           </div>
           <input
