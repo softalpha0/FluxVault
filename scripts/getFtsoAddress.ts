@@ -15,7 +15,7 @@ async function main() {
     outputs: [{ name: "", type: "address" }],
   }];
 
-  const names = ["FtsoV2", "FastUpdater", "FdcHub", "FdcVerification"];
+  const names = ["Relay", "FdcHub", "FtsoV2", "FlareSystemsManager"];
 
   for (const name of names) {
     try {
@@ -32,4 +32,4 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(e); process.exitCode = 1; });
+main().catch(console.error);
