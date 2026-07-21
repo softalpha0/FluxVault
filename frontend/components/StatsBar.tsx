@@ -3,13 +3,14 @@
 import { useReadContract, useAccount } from "wagmi";
 import { createPublicClient, http, formatUnits } from "viem";
 import { useEffect, useState } from "react";
-import { CONTRACTS, VAULT_ABI, FDC_ABI, FTSO_FEEDS, ASSETS } from "@/lib/contracts";
+import { CONTRACTS, VAULT_ABI, FTSO_FEEDS } from "@/lib/contracts";
 
 const client = createPublicClient({
   transport: http("https://coston2-api.flare.network/ext/C/rpc"),
 });
 
 const FTSO_V2 = "0xC4e9c78EA53db782E28f28Fdf80BaF59336B304d" as `0x${string}`;
+const FDC_TRANSFER_VERIFIER = "0x7c9546d6d3b20db46a78ed4c15443d93ef5c47ae" as `0x${string}`;
 
 const FTSO_ABI_READ = [{
   name: "getFeedById",
@@ -21,6 +22,14 @@ const FTSO_ABI_READ = [{
     { name: "_decimals", type: "int8" },
     { name: "_timestamp", type: "uint64" },
   ],
+}];
+
+const FDC_COUNT_ABI = [{
+  name: "getVerifiedCount",
+  type: "function" as const,
+  stateMutability: "view" as const,
+  inputs: [],
+  outputs: [{ name: "", type: "uint256" }],
 }];
 
 function StatCard({ label, value, sub, color = "#00D4AA" }: {
@@ -40,6 +49,7 @@ export function StatsBar() {
   const { address } = useAccount();
   const [tvl, setTvl] = useState("0.00");
   const [xrpPrice, setXrpPrice] = useState("---");
+  const [fdcCount, setFdcCount] = useState("0");
 
   const { data: fxrpTotal } = useReadContract({
     address: CONTRACTS.VAULT as `0x${string}`,
@@ -65,17 +75,10 @@ export function StatsBar() {
     query: { refetchInterval: 5000 },
   });
 
-  const { data: fdcVerified } = useReadContract({
-    address: CONTRACTS.FDC_VERIFIER as `0x${string}`,
-    abi: FDC_ABI,
-    functionName: "getVerifiedAmount",
-    args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 10000 },
-  });
-
   useEffect(() => {
-    const fetchPrice = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch XRP price from FTSO
         const res = await client.readContract({
           address: FTSO_V2,
           abi: FTSO_ABI_READ,
@@ -84,16 +87,29 @@ export function StatsBar() {
         });
         const price = Number(res[0] as bigint) / Math.pow(10, Math.abs(Number(res[1])));
         setXrpPrice("$" + price.toFixed(4));
-        const fxrpAmt   = fxrpTotal  ? Number(formatUnits(fxrpTotal  as bigint, 18)) : 0;
-        const fbtcAmt   = fbtcTotal  ? Number(formatUnits(fbtcTotal  as bigint, 18)) : 0;
-        const fdogeAmt  = fdogeTotal ? Number(formatUnits(fdogeTotal as bigint, 18)) : 0;
+
+        // Calculate TVL
+        const fxrpAmt  = fxrpTotal  ? Number(formatUnits(fxrpTotal  as bigint, 18)) : 0;
+        const fbtcAmt  = fbtcTotal  ? Number(formatUnits(fbtcTotal  as bigint, 18)) : 0;
+        const fdogeAmt = fdogeTotal ? Number(formatUnits(fdogeTotal as bigint, 18)) : 0;
         setTvl((fxrpAmt + fbtcAmt + fdogeAmt).toFixed(4));
+
+        // Fetch FDC verified count from FDCTransferVerifier
+        const count = await client.readContract({
+          address: FDC_TRANSFER_VERIFIER,
+          abi: FDC_COUNT_ABI,
+          functionName: "getVerifiedCount",
+          args: [],
+        });
+        setFdcCount((count as bigint).toString());
+
       } catch (e) {
-        console.error("FTSO price error:", e);
+        console.error("StatsBar fetch error:", e);
       }
     };
-    fetchPrice();
-    const interval = setInterval(fetchPrice, 5000);
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, [fxrpTotal, fbtcTotal, fdogeTotal]);
 
@@ -113,8 +129,8 @@ export function StatsBar() {
       />
       <StatCard
         label="FDC Verified"
-        value={fdcVerified ? Number(formatUnits(fdcVerified as bigint, 6)).toFixed(2) : "0.00"}
-        sub="Cross-chain proofs"
+        value={fdcCount}
+        sub="EVMTransaction proofs"
         color="#8B5CF6"
       />
       <StatCard
